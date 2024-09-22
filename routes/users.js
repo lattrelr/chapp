@@ -1,0 +1,10 @@
+const express = require("express");
+const authjwt = require("../middleware/authjwt");
+const router = express.Router();
+
+const controller = require("../controllers/users");
+
+router.post("/login", controller.login);
+router.get("/active", authjwt.verifyToken, controller.getActiveUser);
+
+module.exports = router;
