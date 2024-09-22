@@ -4,9 +4,9 @@ const router = express.Router();
 
 const controller = require("../controllers/users");
 
-router.post("/login", controller.login);
-router.get("/active", authjwt.verifyToken, controller.active);
-router.get("/logout", controller.logout);
-router.post("/signup", controller.signup);
+router.post("/", controller.createUser);
+router.get("/", controller.getUsers);
+// TODO for testing no token needed
+//router.get("/", authjwt.verifyToken, controller.getUsers);
 
 module.exports = router;
