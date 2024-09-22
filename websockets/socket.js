@@ -1,6 +1,8 @@
 const socket = {};
 const WebSocketServer = require('ws').Server
 const authjwt = require ('../middleware/authjwt');
+const statusMessage = require ('./statusMessage');
+const textMessage = require ('./textMessage');
 let ws = null
 const clientMap = new Map();
 
@@ -28,7 +30,7 @@ async function onUpgrade(request, socket, head) {
 
 function handleNew(socket) {
     console.log(`New connection for user ${socket.userId}`)
-    setStatus(socket.userId, "ONLINE");
+    setStatus(socket.userId, statusMessage.ONLINE);
     clientMap.set(socket.userId, socket)
 
     socket.on('message', msg => {
@@ -42,9 +44,10 @@ function handleNew(socket) {
 
 function handleMessage(socket, msg) {
     // TODO validate
-    msg_json = JSON.parse(msg)
-    if (msg_json["to"] != undefined) {
-        let toSocket = clientMap.get(msg_json["to"])
+    // TODO do some sort of ACK and or read receipt
+    let toUser = textMessage.getTo(msg)
+    if (toUser != null) {
+        let toSocket = clientMap.get(toUser)
         if (toSocket != undefined) {
             directMessage(socket, toSocket, msg)
         }
@@ -54,22 +57,18 @@ function handleMessage(socket, msg) {
 }
 
 function setStatus(user, status) {
-    msg = {
-        "type": "status",
-        "who": user,
-        "status": status
-    }
-    broadcastMessage(JSON.stringify(msg))
+    msg = statusMessage.get(user, status)
+    broadcastMessage(msg)
 }
 
 function handleClose(socket) {
     console.log(`WebSocket was closed for ${socket.userId}`)
-    setStatus(socket.userId, "OFFLINE");
+    setStatus(socket.userId, statusMessage.OFFLINE);
     clientMap.delete(socket.userId)
 }
 
 function directMessage(fromSocket, toSocket, msg) {
-    console.log(`From ${fromSocket.userId} to ${toSocket.userId}`)
+    console.log(`From ${textMessage.getFrom(msg)} to ${textMessage.getTo(msg)}`)
     fromSocket.send(msg)
     toSocket.send(msg)
 }

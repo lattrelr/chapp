@@ -3,11 +3,10 @@ const authjwt = {};
 // TODO store in env
 const privateKey = "1cd83fa16555147ab7f4923937107f57b609cb47";
 
-function decodeToken(header) {
-    let token = null
+function decodeToken(token, header) {
     let decoded = null
 
-    if(typeof header !== 'undefined') {
+    if (typeof header !== 'undefined') {
         const bearer = header.split(' ');
         token = bearer[1];
     }
@@ -21,9 +20,26 @@ function decodeToken(header) {
     return decoded;
 }
 
+function parseCookie(str) {
+    if (str == undefined)
+        return {}
+
+    return str
+        .split(';')
+        .map(v => v.split('='))
+        .reduce((acc, v) => {
+            if (v[0] != undefined && v[1] != undefined)
+                acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
+            return acc;
+        }, {});
+}
+
 authjwt.verifyTokenWs = (request) => {
+    cookies = parseCookie(request.headers['cookie'])
     const header = request.headers['authorization']
-    decoded = decodeToken(header);
+    const token = cookies["SessionID"];
+
+    decoded = decodeToken(token, header);
     if (decoded == null) {
         return null
     }
@@ -32,8 +48,9 @@ authjwt.verifyTokenWs = (request) => {
 
 authjwt.verifyToken = (req, res, next) => {
     const header = req.headers['authorization'];
+    const token = req.cookies["SessionID"];
 
-    decoded = decodeToken(header);
+    decoded = decodeToken(token, header);
     if (decoded == null) {
         return res.status(401).json({
             message: "Unauthorized",
@@ -54,4 +71,4 @@ authjwt.createToken = (userId) => {
     return token;
 }
 
-  module.exports = authjwt;
+module.exports = authjwt;

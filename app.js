@@ -7,7 +7,7 @@ const asyncHandler = require("express-async-handler");
 const app = express();
 const port = 3000;
 
-const notifySocket = require("./websockets/notify");
+const notifySocket = require("./websockets/socket");
 const messagesRouter = require("./routes/messages");
 const usersRouter = require("./routes/users");
 
