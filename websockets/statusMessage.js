@@ -11,6 +11,6 @@ statusMessage.get = (user, status)  => {
 
 statusMessage.ONLINE = "ONLINE"
 statusMessage.OFFLINE = "OFFLINE"
-statusMessage.AWAY = "OFFLINE"
+statusMessage.AWAY = "AWAY"
 
 module.exports = statusMessage;

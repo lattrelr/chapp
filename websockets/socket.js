@@ -50,6 +50,8 @@ function handleMessage(socket, msg) {
         let toSocket = clientMap.get(toUser)
         if (toSocket != undefined) {
             directMessage(socket, toSocket, msg)
+        } else {
+            console.log(`WebSocket for ${toUser} not found!`)
         }
     } else {
         broadcastMessage(msg)

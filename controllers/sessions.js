@@ -37,7 +37,7 @@ controller.active = async (req, res) => {
     const user = req.userId;
     if (user != null) {
         return res.status(200).json({
-            username: user
+            id: user
         });
     }
 
