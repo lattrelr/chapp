@@ -34,6 +34,7 @@ function handleNew(socket) {
     clientMap.set(socket.userId, socket)
 
     socket.on('message', msg => {
+        textMessage.persist(msg)
         handleMessage(socket, msg)
     })
 

@@ -1,5 +1,6 @@
 const express = require("express");
 const cookieParser = require('cookie-parser');
+const mongoose = require('mongoose');
 // TODO use these
 const { query, validationResult } = require('express-validator');
 const asyncHandler = require("express-async-handler");
@@ -25,8 +26,10 @@ app.use((req, res, next) => {
     res.send("ERROR");
 });
 
+// SQL DB start
 const db = require("./models");
-db.sequelize.sync({ force: true })
+//db.sequelize.sync({ force: true })
+db.sequelize.sync()
   .then(() => {
     console.log("Dropped and synced db.");
   })
@@ -37,6 +40,12 @@ db.sequelize.sync({ force: true })
 const server = app.listen(port, () => {
     console.log(`Started app on port ${port}`);
 });
+
+// Mongo DB start
+mongoose
+    .connect("mongodb://127.0.0.1:27017/chapp")
+    .then(() => console.log('MongoDB database Connected...'))
+    .catch((err) => console.log(err))
 
 notifySocket.start(server);
 
