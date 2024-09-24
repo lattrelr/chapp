@@ -25,7 +25,7 @@ async function addUser(key, req, res) {
         .then(data => {
             console.log(`Created user ${data.id}`);
             res.send({
-                message: "User create OK"
+                message: "User created OK"
             });
         })
         .catch(err => {

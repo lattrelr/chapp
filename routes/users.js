@@ -10,4 +10,6 @@ router.get("/:id", controller.getUser);
 // TODO for testing no token needed
 //router.get("/", authjwt.verifyToken, controller.getUsers);
 
+// TODO route to delete user
+
 module.exports = router;
