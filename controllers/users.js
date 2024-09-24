@@ -11,10 +11,11 @@ async function hashPassword(password) {
     });
 }
 
-controller.createUser = async (req, res) => {
+async function addUser(key, req, res) {
     const hashedpw = await hashPassword(req.body.password);
 
     const newUser = {
+        id: key,
         displayname: req.body.username,
         username: req.body.username,
         hash: hashedpw
@@ -31,6 +32,31 @@ controller.createUser = async (req, res) => {
             res.status(500).send({
             message:
                 err.message || "Some error occurred while creating the user."
+            });
+        });
+}
+
+controller.createUser = async (req, res) => {
+    // To make the user first we create a key in the msgkey database,
+    // this is used as the PK for the user, and also the GUID that
+    // the user will be referenced by in the token, and message
+    // routing.
+
+    // We want a list of msgkeys that are unique so we can use them for
+    // both single user and group messages.
+    const msgKey = {
+        type: "user"
+    }
+
+    db.msgkeys.create(msgKey)
+        .then(data => {
+            console.log(`Created key ${data.id}`);
+            addUser(data.id, req, res);
+        })
+        .catch(err => {
+            res.status(500).send({
+            message:
+                err.message || "Some error occurred while creating the key."
             });
         });
 };

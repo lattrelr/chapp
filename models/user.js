@@ -2,7 +2,6 @@ const User = (sequelize, Sequelize) => {
     return sequelize.define("user", {
         id: {
             type: Sequelize.UUID,
-            defaultValue: Sequelize.UUIDV4,
             allowNull: false,
             primaryKey: true,
         },
