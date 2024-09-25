@@ -8,6 +8,7 @@ async function addGroup(key, req, res) {
         id: key,
         displayname: req.body.displayname,
         description: req.body.description,
+        createdby: req.body.createdby
     }
 
     db.groups.create(newGroup)
@@ -50,22 +51,35 @@ controller.createGroup = async (req, res) => {
 };
 
 controller.getGroups = async (req, res) => {
-    // TODO add where and get params to give less to the client if they want just an ID
-    db.groups.findAll()
-        .then(data => {
-            res.send(data);
-        })
-        .catch(err => {
-            res.status(500).send({
-                message:
-                    err.message || "Some error occurred while retrieving tutorials."
+    const owner = req.query.createdby;
+    if (owner != undefined) {
+        db.groups.findAll({ where: { "createdby": owner }})
+            .then(data => {
+                res.send(data);
+            })
+            .catch(err => {
+                res.status(500).send({
+                    message:
+                        err.message || "Some error occurred while retrieving tutorials."
+                });
             });
-        });
+    } else {
+        db.groups.findAll()
+            .then(data => {
+                res.send(data);
+            })
+            .catch(err => {
+                res.status(500).send({
+                    message:
+                        err.message || "Some error occurred while retrieving tutorials."
+                });
+            });
+    }
 }
 
 controller.getGroup = async (req, res) => {
     // TODO add where and get params to give less to the client if they want just an ID
-    db.users.findByPk(req.params.id, {})
+    db.groups.findByPk(req.params.id, {})
         .then(data => {
             res.send(data);
         })

@@ -34,7 +34,11 @@ function handleNew(socket) {
     clientMap.set(socket.userId, socket)
 
     socket.on('message', msg => {
+        // Set the user this came from
+        msg = textMessage.setFrom(msg, socket.userId)
+        // Store the mssage in the DB
         textMessage.persist(msg)
+        // Send out
         handleMessage(socket, msg)
     })
 

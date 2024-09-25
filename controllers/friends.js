@@ -1,5 +1,6 @@
 const db = require("../models");
 const { Op, QueryTypes } = require('sequelize');
+const { validationResult } = require("express-validator");
 const controller = {};
 
 async function checkForExisting(req, res) {
@@ -21,6 +22,11 @@ async function checkForExisting(req, res) {
 }
 
 controller.createFriend = async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     const friend = {
         user1: req.body.user1,
         user2: req.body.user2

@@ -1,6 +1,12 @@
 const textMessage = {}
 const Message = require('../models/message');
 
+textMessage.setTo = (msg, toUser)  => {
+    msg_json = JSON.parse(msg)
+    msg_json["to"] = toUser;
+    return JSON.stringify(msg_json)
+}
+
 textMessage.getTo = (msg)  => {
     toUser = null
     msg_json = JSON.parse(msg)
@@ -17,6 +23,15 @@ textMessage.getFrom = (msg)  => {
         fromUser = msg_json["from"];
     }
     return fromUser
+}
+
+// TODO maybe add FROM_DISPLAYNAME so client doesn't need to find it
+// on first message.  Might reduce server load.
+
+textMessage.setFrom = (msg, fromUser)  => {
+    msg_json = JSON.parse(msg)
+    msg_json["from"] = fromUser;
+    return JSON.stringify(msg_json)
 }
 
 textMessage.persist = (msg) => {

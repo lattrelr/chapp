@@ -11,6 +11,10 @@ const Group = (sequelize, Sequelize) => {
         description: {
             type: Sequelize.STRING,
         },
+        createdby: {
+            type: Sequelize.UUID,
+            allowNull: false,
+        },
     });
 }
 
