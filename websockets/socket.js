@@ -81,7 +81,7 @@ function handleClose(socket) {
 }
 
 function directMessage(fromSocket, toSocket, msg) {
-    console.log(`From ${textMessage.getFrom(msg)} to ${textMessage.getTo(msg)}`)
+    console.log(`[DM] From ${textMessage.getFrom(msg)} to ${textMessage.getTo(msg)}`)
     fromSocket.send(msg)
     toSocket.send(msg)
 }
@@ -91,16 +91,15 @@ function sendGroupMessage(groupId, msg) {
     // who the members are. -- Need to invalidate if members changed!!
 
     // IF NOT IN CACHE:
-
-    // TODO: FIXME: This isn't working...but the query works manually.
     db.members.findAll({ where: { "group": groupId } })
         .then(data => {
-            members.forEach(member => {
+            data.forEach(member => {
                 let toSocket = clientMap.get(member.user)
                 if (toSocket != undefined) {
-                    directMessage(socket, toSocket, msg)
+                    console.log(`[Group] From group ${groupId} to user ${member.user}`)
+                    toSocket.send(msg)
                 } else {
-                    console.log(`[Group] WebSocket for ${toUser} not found!`)
+                    console.log(`[Group] WebSocket for ${member.user} not found!`)
                 }
             })
         })
