@@ -21,7 +21,7 @@ db.sequelize = sequelize;
 db.msgkeys = require("./msgkey")(sequelize, Sequelize);
 db.users = require("./user")(sequelize, Sequelize);
 db.groups = require("./group")(sequelize, Sequelize);
-db.groupMembers = require("./groupMember")(sequelize, Sequelize);
+db.members = require("./member")(sequelize, Sequelize);
 db.friends = require("./friend")(sequelize, Sequelize);
 
 module.exports = db;

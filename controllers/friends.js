@@ -112,7 +112,7 @@ controller.getFriends = async (req, res) => {
          INNER JOIN users ON friends.user2=users.id
          WHERE user1='${myId}';`
 
-    const friends = db.sequelize.query(rawQuery, {
+    db.sequelize.query(rawQuery, {
         type: QueryTypes.SELECT,
     }).then(data => {
         res.send(data);

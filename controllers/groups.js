@@ -1,4 +1,5 @@
 const db = require("../models");
+const { Op, QueryTypes } = require('sequelize');
 const controller = {};
 
 async function addGroup(key, req, res) {
@@ -52,6 +53,7 @@ controller.createGroup = async (req, res) => {
 
 controller.getGroups = async (req, res) => {
     const owner = req.query.createdby;
+    const member = req.query.member;
     if (owner != undefined) {
         db.groups.findAll({ where: { "createdby": owner }})
             .then(data => {
@@ -60,9 +62,26 @@ controller.getGroups = async (req, res) => {
             .catch(err => {
                 res.status(500).send({
                     message:
-                        err.message || "Some error occurred while retrieving tutorials."
+                        err.message || "Some error occurred while retrieving groups."
                 });
             });
+    } else if (member != undefined)  {
+        const rawQuery =
+            `SELECT groups.id, groups.displayname, groups.description, groups.createdby
+            FROM members
+            INNER JOIN groups ON members.group=groups.id
+            WHERE members.user='${member}';`
+        db.sequelize.query(rawQuery, {
+            type: QueryTypes.SELECT,
+        }).then(data => {
+            res.send(data);
+        })
+        .catch(err => {
+            res.status(500).send({
+                message:
+                    err.message || "Some error occurred while retrieving groups."
+            });
+        });
     } else {
         db.groups.findAll()
             .then(data => {
@@ -71,7 +90,7 @@ controller.getGroups = async (req, res) => {
             .catch(err => {
                 res.status(500).send({
                     message:
-                        err.message || "Some error occurred while retrieving tutorials."
+                        err.message || "Some error occurred while retrieving groups."
                 });
             });
     }
@@ -86,7 +105,7 @@ controller.getGroup = async (req, res) => {
         .catch(err => {
             res.status(500).send({
                 message:
-                    err.message || "Some error occurred while retrieving tutorials."
+                    err.message || "Some error occurred while retrieving group."
             });
         });
 }

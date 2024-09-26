@@ -1,5 +1,5 @@
-const GroupMember = (sequelize, Sequelize) => {
-    return sequelize.define("groupmember", {
+const Member = (sequelize, Sequelize) => {
+    return sequelize.define("member", {
         group: {
             type: Sequelize.UUID,
             allowNull: false,
@@ -11,4 +11,4 @@ const GroupMember = (sequelize, Sequelize) => {
     });
 }
 
-module.exports = GroupMember
+module.exports = Member

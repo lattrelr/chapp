@@ -14,6 +14,7 @@ const usersRouter = require("./routes/users");
 const sessionsRouter = require("./routes/sessions");
 const friendsRouter = require("./routes/friends");
 const groupsRouter = require("./routes/groups");
+const membersRouter = require("./routes/members");
 
 app.use(cookieParser());
 app.use(express.json());
@@ -25,6 +26,7 @@ app.use("/api/users", usersRouter);
 app.use("/api/sessions", sessionsRouter);
 app.use("/api/friends", friendsRouter);
 app.use("/api/groups", groupsRouter);
+app.use("/api/members", membersRouter);
 
 app.use((req, res, next) => {
     res.send("ERROR");
