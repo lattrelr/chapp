@@ -84,19 +84,25 @@ controller.getAllMembers = async (req, res) => {
         });
 }
 
-// TODO join on users table...
 controller.getMembers = async (req, res) => {
     const group = req.params.id
-    db.members.findAll({ where: { "group": group } })
-        .then(data => {
-            res.send(data);
-        })
-        .catch(err => {
-            res.status(500).send({
-                message:
-                    err.message || "Some error occurred while retrieving members."
-            });
+    const rawQuery =
+        `SELECT users.id,users.displayname
+         FROM members
+         INNER JOIN users ON members.user=users.id
+         WHERE members.group='${group}';`
+
+    db.sequelize.query(rawQuery, {
+        type: QueryTypes.SELECT,
+    }).then(data => {
+        res.send(data);
+    })
+    .catch(err => {
+        res.status(500).send({
+            message:
+                err.message || "Some error occurred while retrieving members."
         });
+    });
 }
 
 module.exports = controller;

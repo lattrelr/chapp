@@ -71,6 +71,7 @@ controller.getGroups = async (req, res) => {
             FROM members
             INNER JOIN groups ON members.group=groups.id
             WHERE members.user='${member}';`
+
         db.sequelize.query(rawQuery, {
             type: QueryTypes.SELECT,
         }).then(data => {
