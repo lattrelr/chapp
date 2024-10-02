@@ -22,6 +22,7 @@ controller.login = async (req, res) => {
 
             // Return the token via json to use as auth as option
             return res.status(200).json({
+                "userId": user.id,
                 "token": token,
             });
         }
@@ -37,7 +38,7 @@ controller.active = async (req, res) => {
     const user = req.userId;
     if (user != null) {
         return res.status(200).json({
-            id: user
+            userId: user
         });
     }
 

@@ -16,6 +16,7 @@ socket.start = (server) => {
     console.log(`Started ws server`);
 }
 
+// TODO this shouldn't be async
 async function onUpgrade(request, socket, head) {
     userId = authjwt.verifyTokenWs(request)
     if (userId == null) {
@@ -53,9 +54,9 @@ function handleMessage(socket, msg) {
     // the client will know if it is a group or a user.
     // TODO validate
     // TODO do some sort of ACK and or read receipt
-    let toUser = textMessage.getTo(msg)
+    const toUser = textMessage.getTo(msg)
     if (toUser != null) {
-        let toSocket = clientMap.get(toUser)
+        const toSocket = clientMap.get(toUser)
         if (toSocket != undefined) {
             directMessage(socket, toSocket, msg)
         } else {
