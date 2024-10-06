@@ -34,17 +34,31 @@ textMessage.setFrom = (msg, fromUser)  => {
     return JSON.stringify(msg_json)
 }
 
-textMessage.persist = (msg) => {
+textMessage.setId = (msg, msgid)  => {
     msg_json = JSON.parse(msg)
-    Message.create({ 
+    msg_json["_id"] = msgid;
+    return JSON.stringify(msg_json)
+}
+
+textMessage.persist = async (msg) => {
+    msg_json = JSON.parse(msg)
+
+    newMsg = {
         from: msg_json["from"],
         to: msg_json["to"],
         text: msg_json["text"],
-    }).then(() => {
+    }
+
+    let res = null
+    try {
+        res = await Message.create(newMsg)
         console.log("Message saved.");
-    }).catch((err) => {
+    } catch (err)  {
         console.log("Message did not save! " + err);
-    });
+        throw err
+    };
+
+    return res._id.toString()
 }
 
 module.exports = textMessage;

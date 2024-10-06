@@ -42,6 +42,8 @@ controller.createUser = async (req, res) => {
     // the user will be referenced by in the token, and message
     // routing.
 
+    // TODO delete msgKey
+
     // We want a list of msgkeys that are unique so we can use them for
     // both single user and group messages.
     const msgKey = {
