@@ -36,13 +36,32 @@ async function addUser(key, req, res) {
         });
 }
 
+async function checkForUsername(req) {
+    exists = await db.users.findOne({
+        where: {
+            "username": req.body.username,
+        }
+    });
+    if (exists == null) {
+        return false;
+    }
+    return true;
+}
+
 controller.createUser = async (req, res) => {
+    // TODO delete msgKey ?  We might want group to be a message type instead.
+
+    if (await checkForUsername(req)) {
+        return res.status(500).send({
+            message:
+                "Username already exists!"
+        });
+    }
+
     // To make the user first we create a key in the msgkey database,
     // this is used as the PK for the user, and also the GUID that
     // the user will be referenced by in the token, and message
     // routing.
-
-    // TODO delete msgKey
 
     // We want a list of msgkeys that are unique so we can use them for
     // both single user and group messages.
