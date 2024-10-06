@@ -16,8 +16,11 @@ socket.start = (server) => {
     console.log(`Started ws server`);
 }
 
-// TODO this shouldn't be async
-async function onUpgrade(request, socket, head) {
+socket.getOnlineUsers = () => {
+    // TBD
+}
+
+function onUpgrade(request, socket, head) {
     userId = authjwt.verifyTokenWs(request)
     if (userId == null) {
         console.log(`Token not valid for web socket start`)
@@ -30,52 +33,72 @@ async function onUpgrade(request, socket, head) {
     }
 }
 
+function addToClientMap(socket) {
+    if (clientMap.get(socket.userId) == undefined) {
+        clientMap.set(socket.userId, [socket])
+        setStatus(socket.userId, statusMessage.ONLINE);
+    } else {
+        clientMap.get(socket.userId).push(socket)
+    }
+}
+
+function removeFromClientMap(socket) {
+    let arr = clientMap.get(socket.userId)
+    if (clientMap.get(socket.userId) != undefined) {
+        arr = arr.filter(item =>
+            item != socket
+        )
+        if (arr.length) {
+            clientMap.set(socket.userId, arr)
+        } else {
+            clientMap.delete(socket.userId)
+            setStatus(socket.userId, statusMessage.OFFLINE);
+        }
+    }
+}
+
 function handleNew(socket) {
-    console.log(`New connection for user ${socket.userId}`)
-    setStatus(socket.userId, statusMessage.ONLINE);
-    // TODO should allow multiple instances of same user.
-    clientMap.set(socket.userId, socket)
+    console.log(`A connection started for user ${socket.userId}`)
+    addToClientMap(socket)
 
     socket.on('message', msg => {
-        // Set the user this came from
-        msg = textMessage.setFrom(msg, socket.userId)
-        // Store the mssage in the DB
-        // TODO not sure how well it scales to wait for writes before sending?
-        // but probably good way to ACK is having an ID...
-        textMessage.persist(msg).then(id => {
-            // Populate with id from db
-            msg = textMessage.setId(msg, id)
-            // Send out
-            handleMessage(socket, msg)
-        }).catch(err => {
-            // TODO tbd
-        })
+        handleMessage(socket, msg)
     })
 
     socket.on('close', () => {
-        handleClose(socket)
+        console.log(`A connection ended for ${socket.userId}`)
+        removeFromClientMap(socket)
     })
 }
 
 function handleMessage(socket, msg) {
+    // Set the user this came from
+    msg = textMessage.setFrom(msg, socket.userId)
+    // TODO not sure how well it scales to wait for writes before sending?
+    // Store the mssage in the DB
+    textMessage.persist(msg).then(id => {
+        // Populate with id from db
+        msg = textMessage.setId(msg, id)
+        sendMessage(msg)
+    }).catch(err => {
+        // TODO tbd
+    })
+}
+
+function sendMessage(msg) {
     // TODO handle group messages by tagging them as "group" by the client first.
     // the client will know if it is a group or a user.  Delete msgkeys table!
     // TODO validate
-    // TODO do some sort of ACK and or read receipt
-    const toUser = textMessage.getTo(msg)
-    if (toUser != null) {
-        const toSocket = clientMap.get(toUser)
-        if (toSocket != undefined) {
-            // TODO should allow multiple instances of same user.
-            // TODO Make a fun to send to a user, that can find the many sockets for that user. Do in async...
-            directMessage(socket, toSocket, msg)
-        } else {
-            // TODO tag message as group by the client to avoid unwanted lookups.
-            //console.log(`[DM] WebSocket for ${toUser} not found!`)
-            // Try a group message if user DNE
-            // TODO we can use msgkeys someway or another...maybe faster to check that quick.
-            sendGroupMessage(toUser, msg)
-        }
+    // TODO do some sort of ACK and or read receipt/delivered
+    // TODO some sort of NACK if user doesn't exist.
+
+    console.log(`[MSG] ${msg}`)
+
+    // check for group
+    if (true) {
+        sendDirectMessage(msg)
+    } else {
+        sendGroupMessage(msg)
     }
 }
 
@@ -85,22 +108,34 @@ function setStatus(user, status) {
     broadcastMessage(msg)
 }
 
-function handleClose(socket) {
-    console.log(`WebSocket was closed for ${socket.userId}`)
-    setStatus(socket.userId, statusMessage.OFFLINE);
-    clientMap.delete(socket.userId)
-}
+function sendDirectMessage(msg) {
+    const toUser = textMessage.getTo(msg)
+    const fromUser = textMessage.getFrom(msg)
 
-function directMessage(fromSocket, toSocket, msg) {
     console.log(`[DM] From ${textMessage.getFrom(msg)} to ${textMessage.getTo(msg)}`)
-    console.log(`[MSG] ${msg}`)
-    fromSocket.send(msg)
-    toSocket.send(msg)
+
+    if (toUser != null) {
+        sendToUser(toUser, msg)
+    }
+
+    if (fromUser != null) {
+        sendToUser(fromUser, msg)
+    }
 }
 
-function sendGroupMessage(groupId, msg) {
+function sendToUser(userId, msg) {
+    const sockets = clientMap.get(userId)
+    if (sockets != undefined) {
+        for (const socket of sockets) {
+            socket.send(msg)
+        }
+    }
+}
+
+function sendGroupMessage(msg) {
     // TODO find a way to cache X number of groups so we don't have to keep looking up
     // who the members are. -- Need to invalidate if members changed!!
+    groupId = textMessage.getTo(msg)
 
     // IF NOT IN CACHE:
     db.members.findAll({ where: { "group": groupId } })
