@@ -1,5 +1,6 @@
 const bcrypt = require ('bcrypt');
 const db = require("../models");
+const notifySocket = require("../websockets/socket");
 const controller = {};
 
 async function hashPassword(password) {
@@ -86,6 +87,15 @@ controller.getUsers = async (req, res) => {
     // TODO add where and get params to give less to the client if they want just an ID
     db.users.findAll({attributes: ['id', 'displayname']})
         .then(data => {
+            // Add "online" attribute based on current socket data
+            // TODO limit this to friends or groups or paged users.
+            const onlineUsers = notifySocket.getOnlineUsers()
+            data = data.map ( u => {
+                    u = u.toJSON()
+                    u.online = onlineUsers.has(u.id)
+                    return u
+                }
+            )
             res.send(data);
         })
         .catch(err => {
@@ -100,7 +110,10 @@ controller.getUser = async (req, res) => {
     // TODO add where and get params to give less to the client if they want just an ID
     db.users.findByPk(req.params.id, {attributes: ['id', 'displayname']})
         .then(data => {
-            res.send(data);
+            const onlineUsers = notifySocket.getOnlineUsers()
+            let u = data.toJSON()
+            u.online = onlineUsers.has(u.id)
+            res.send(u);
         })
         .catch(err => {
             res.status(500).send({

@@ -17,7 +17,12 @@ socket.start = (server) => {
 }
 
 socket.getOnlineUsers = () => {
-    // TBD
+    // TODO maintain this with add/remove map.  No reason to create on every call here
+    let online = new Set()
+    for (const u of clientMap.keys()) {
+        online.add(u)
+    }
+    return online
 }
 
 function onUpgrade(request, socket, head) {
