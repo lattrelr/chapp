@@ -17,20 +17,42 @@ controller.getMessages = async (req, res) => {
         });
         res.json(messages);
     } else {
-        await getConversation(owner, partner, res);
+        await getConversation(owner, partner, req, res);
     }
 }
 
-async function getConversation(owner, partner, res) {
-    const messages = await Message.find({
-        "$or": [{
-            "from": owner,
-            "to": partner
-        }, {
-            "to": owner,
-            "from": partner
-        }]
-    });
+async function getConversation(owner, partner, req, res) {
+    const after = req.query.after;
+    let messages = {}
+    if (after == undefined) {
+        messages = await Message.find({
+            "$or": [{
+                "from": owner,
+                "to": partner
+            }, {
+                "to": owner,
+                "from": partner
+            }]
+        });
+    } else {
+        console.log("HERE")
+        messages = await Message.find({
+            "$and": [
+                {
+                    "$or": [{
+                        "from": owner,
+                        "to": partner
+                    }, {
+                        "to": owner,
+                        "from": partner
+                    }]
+                },
+                {
+                    "date": {$gte: after}
+                }
+            ]
+        });
+    }
     
     res.json(messages);
 }
