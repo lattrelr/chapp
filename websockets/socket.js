@@ -81,9 +81,10 @@ function handleMessage(socket, msg) {
     msg = textMessage.setFrom(msg, socket.userId)
     // TODO not sure how well it scales to wait for writes before sending?
     // Store the mssage in the DB
-    textMessage.persist(msg).then(id => {
+    textMessage.persist(msg).then(res => {
         // Populate with id from db
-        msg = textMessage.setId(msg, id)
+        msg = textMessage.setId(msg, res._id.toString())
+        msg = textMessage.setDate(msg, new Date(res.date).valueOf())
         sendMessage(msg)
     }).catch(err => {
         // TODO tbd

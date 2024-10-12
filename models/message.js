@@ -16,12 +16,18 @@ const PostSchema = new Schema({
     date: {
         type: Date,
         default: Date.now(),
+        get: (d) => {
+            return d.valueOf()
+        }
     },
     attachment: {
         type: String,
         required: false,
     },
-});
+},
+{
+    toJSON: { getters: true},
+  });
 
 const Message = model('message', PostSchema);
 

@@ -1,6 +1,9 @@
 const textMessage = {}
 const Message = require('../models/message');
 
+// TODO fix all these so they aren't dumb, why are we returning a msg? Can't we
+// just modify the object given?
+
 textMessage.setTo = (msg, toUser)  => {
     msg_json = JSON.parse(msg)
     msg_json["to"] = toUser;
@@ -40,6 +43,12 @@ textMessage.setId = (msg, msgid)  => {
     return JSON.stringify(msg_json)
 }
 
+textMessage.setDate = (msg, date)  => {
+    msg_json = JSON.parse(msg)
+    msg_json["date"] = date;
+    return JSON.stringify(msg_json)
+}
+
 textMessage.persist = async (msg) => {
     msg_json = JSON.parse(msg)
 
@@ -58,7 +67,9 @@ textMessage.persist = async (msg) => {
         throw err
     };
 
-    return res._id.toString()
+    //console.log(`${res}`)
+    //console.log(`${new Date(res.date).valueOf() }`)
+    return res
 }
 
 module.exports = textMessage;
