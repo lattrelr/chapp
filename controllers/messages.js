@@ -4,6 +4,7 @@ const controller = {};
 // TODO limit to owner token only!
 // match id provided by token with request before searching.
 
+// TODO return in order by creation time
 controller.getMessages = async (req, res) => {
     const owner = req.params.id;
     const partner = req.query.with;
@@ -21,6 +22,7 @@ controller.getMessages = async (req, res) => {
     }
 }
 
+// TODO return in order by creation time
 async function getConversation(owner, partner, req, res) {
     const after = req.query.after;
     let messages = {}
