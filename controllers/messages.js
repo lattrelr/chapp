@@ -35,7 +35,6 @@ async function getConversation(owner, partner, req, res) {
             }]
         });
     } else {
-        console.log("HERE")
         messages = await Message.find({
             "$and": [
                 {

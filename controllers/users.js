@@ -15,9 +15,14 @@ async function hashPassword(password) {
 async function addUser(key, req, res) {
     const hashedpw = await hashPassword(req.body.password);
 
+    let displayName = req.body.displayname
+    if (displayName == undefined) {
+        displayName = req.body.username
+    }
+
     const newUser = {
         id: key,
-        displayname: req.body.username,
+        displayname: displayName,
         username: req.body.username,
         hash: hashedpw
     }
@@ -85,7 +90,7 @@ controller.createUser = async (req, res) => {
 
 controller.getUsers = async (req, res) => {
     // TODO add where and get params to give less to the client if they want just an ID
-    db.users.findAll({attributes: ['id', 'displayname']})
+    db.users.findAll({attributes: ['id', 'username', 'displayname']})
         .then(data => {
             // Add "online" attribute based on current socket data
             // TODO limit this to friends or groups or paged users.
@@ -108,7 +113,7 @@ controller.getUsers = async (req, res) => {
 
 controller.getUser = async (req, res) => {
     // TODO add where and get params to give less to the client if they want just an ID
-    db.users.findByPk(req.params.id, {attributes: ['id', 'displayname']})
+    db.users.findByPk(req.params.id, {attributes: ['id', 'username', 'displayname']})
         .then(data => {
             const onlineUsers = notifySocket.getOnlineUsers()
             let u = data.toJSON()
